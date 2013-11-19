@@ -1,0 +1,528 @@
+From 8e55eb788844ae3b56a008bc1a43de9747c24a96 Mon Sep 17 00:00:00 2001
+From: Bryan Evenson <bevenson@melinkcorp.com>
+Date: Mon, 19 Aug 2013 10:05:38 -0400
+Subject: [PATCH 01/02] Adjusted makefiles for cross-compile.
+
+Signed-off-by: Bryan Evenson <bevenson@melinkcorp.com>
+---
+ Makefile                  |   39 +++++++++++++++++++++------------------
+ demo/dcc/Makefile         |    4 ++--
+ demo/epics/Makefile       |    4 ++--
+ demo/gateway/Makefile     |    4 ++--
+ demo/iamrouter/Makefile   |    4 ++--
+ demo/initrouter/Makefile  |    4 ++--
+ demo/mstpcap/Makefile     |    4 ++--
+ demo/mstpcrc/Makefile     |    4 ++--
+ demo/ptransfer/Makefile   |    4 ++--
+ demo/readfile/Makefile    |    4 ++--
+ demo/readprop/Makefile    |    4 ++--
+ demo/readpropm/Makefile   |    4 ++--
+ demo/reinit/Makefile      |    4 ++--
+ demo/scov/Makefile        |    4 ++--
+ demo/server/Makefile      |    4 ++--
+ demo/timesync/Makefile    |    4 ++--
+ demo/ucov/Makefile        |    4 ++--
+ demo/uptransfer/Makefile  |    4 ++--
+ demo/whohas/Makefile      |    4 ++--
+ demo/whois/Makefile       |    4 ++--
+ demo/whoisrouter/Makefile |    4 ++--
+ demo/writefile/Makefile   |    4 ++--
+ demo/writeprop/Makefile   |    4 ++--
+ lib/Makefile              |    6 +++---
+ 24 files changed, 68 insertions(+), 65 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index b10b6b7..a7c630b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -9,6 +9,9 @@
+ #
+ # Assumes rm and cp are available
+ 
++# Set the base directory.
++BACNET_TOP:=${CURDIR}
++
+ # configuration
+ # If BACNET_DEFINES has not already been set, configure to your needs here
+ MY_BACNET_DEFINES = -DPRINT_ENABLED=1
+@@ -31,36 +34,36 @@ BBMD_DEFINE ?= -DBBMD_ENABLED=1
+ #BBMD_DEFINE ?= -DBBMD_CLIENT_ENABLED
+ 
+ # Passing parameters via command line
+-MAKE_DEFINE ?=
++BACNET_MAKE_DEFINE ?=
+ 
+ # Define WEAK_FUNC for [...somebody help here; I can't find any uses of it]
+-DEFINES = $(BACNET_DEFINES) $(BACDL_DEFINE) $(BBMD_DEFINE) -DWEAK_FUNC=
+-DEFINES += $(MAKE_DEFINE)
++BACNET_DEFINES += $(BACDL_DEFINE) $(BBMD_DEFINE) -DWEAK_FUNC=
++BACNET_DEFINES += $(BACNET_MAKE_DEFINE)
+ 
+ # directories
+ BACNET_PORT ?= linux
+-BACNET_PORT_DIR = ../ports/${BACNET_PORT}
++BACNET_PORT_DIR := ${BACNET_TOP}/ports/${BACNET_PORT}
+ 
+-BACNET_OBJECT = ../demo/object
+-BACNET_HANDLER = ../demo/handler
+-BACNET_CORE = ../src
+-BACNET_INCLUDE = ../include
++BACNET_OBJECT := ${BACNET_TOP}/demo/object
++BACNET_HANDLER := ${BACNET_TOP}/demo/handler
++BACNET_CORE := ${BACNET_TOP}/src
++BACNET_INCLUDE := ${BACNET_TOP}/include
+ # compiler configuration
+ #STANDARDS = -std=c99
+-INCLUDE1 = -I$(BACNET_PORT_DIR) -I$(BACNET_OBJECT) -I$(BACNET_HANDLER)
+-INCLUDE2 = -I$(BACNET_INCLUDE)
+-INCLUDES = $(INCLUDE1) $(INCLUDE2)
+-OPTIMIZATION = -Os
+-DEBUGGING =
+-WARNINGS = -Wall -Wmissing-prototypes
++BACNET_INCLUDE1 = -I$(BACNET_PORT_DIR) -I$(BACNET_OBJECT) -I$(BACNET_HANDLER)
++BACNET_INCLUDE2 = -I$(BACNET_INCLUDE)
++BACNET_INCLUDES = $(BACNET_INCLUDE1) $(BACNET_INCLUDE2)
++BACNET_OPTIMIZATION = -Os
++BACNET_DEBUGGING =
++BACNET_WARNINGS = -Wall -Wmissing-prototypes
+ ifeq (${BUILD},debug)
+-OPTIMIZATION = -O0
+-DEBUGGING = -g -DDEBUG_ENABLED=1
++BACNET_OPTIMIZATION = -O0
++BACNET_DEBUGGING = -g -DDEBUG_ENABLED=1
+ ifeq (${BACDL_DEFINE},-DBACDL_BIP=1)
+-DEFINES += -DBIP_DEBUG
++BACNET_DEFINES += -DBIP_DEBUG
+ endif
+ endif
+-CFLAGS  = $(WARNINGS) $(DEBUGGING) $(OPTIMIZATION) $(STANDARDS) $(INCLUDES) $(DEFINES)
++BACNET_CFLAGS  = $(BACNET_WARNINGS) $(BACNET_DEBUGGING) $(BACNET_OPTIMIZATION) $(BACNET_STANDARDS) $(BACNET_INCLUDES) $(BACNET_DEFINES)
+ 
+ # Export the variables defined here to all subprocesses
+ # (see http://www.gnu.org/software/automake/manual/make/Special-Targets.html)
+diff --git a/demo/dcc/Makefile b/demo/dcc/Makefile
+index 1ddc898..249ceb0 100644
+--- a/demo/dcc/Makefile
++++ b/demo/dcc/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/epics/Makefile b/demo/epics/Makefile
+index 01ddb04..3ab6386 100644
+--- a/demo/epics/Makefile
++++ b/demo/epics/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/gateway/Makefile b/demo/gateway/Makefile
+index d97d286..e28c64a 100644
+--- a/demo/gateway/Makefile
++++ b/demo/gateway/Makefile
+@@ -34,11 +34,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/iamrouter/Makefile b/demo/iamrouter/Makefile
+index 8c33208..98aa6cb 100644
+--- a/demo/iamrouter/Makefile
++++ b/demo/iamrouter/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/initrouter/Makefile b/demo/initrouter/Makefile
+index ae7352e..8d08b91 100644
+--- a/demo/initrouter/Makefile
++++ b/demo/initrouter/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/mstpcap/Makefile b/demo/mstpcap/Makefile
+index 43c7e3e..ffaf93a 100644
+--- a/demo/mstpcap/Makefile
++++ b/demo/mstpcap/Makefile
+@@ -34,11 +34,11 @@ ${TARGET_BIN}: ${OBJS} Makefile
+ 	cp $@ ../../bin
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} $(TARGET).map
+diff --git a/demo/mstpcrc/Makefile b/demo/mstpcrc/Makefile
+index 05e0011..0726d4b 100644
+--- a/demo/mstpcrc/Makefile
++++ b/demo/mstpcrc/Makefile
+@@ -41,11 +41,11 @@ ${TARGET_BIN}: ${OBJS} Makefile
+ 	cp $@ ../../bin
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} $(TARGET).map
+diff --git a/demo/ptransfer/Makefile b/demo/ptransfer/Makefile
+index b1b9867..4f4c400 100644
+--- a/demo/ptransfer/Makefile
++++ b/demo/ptransfer/Makefile
+@@ -32,11 +32,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -rf core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET}
+diff --git a/demo/readfile/Makefile b/demo/readfile/Makefile
+index 235f65c..16380fa 100644
+--- a/demo/readfile/Makefile
++++ b/demo/readfile/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/readprop/Makefile b/demo/readprop/Makefile
+index 836ee01..d98732c 100644
+--- a/demo/readprop/Makefile
++++ b/demo/readprop/Makefile
+@@ -32,11 +32,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -rf core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET}
+diff --git a/demo/readpropm/Makefile b/demo/readpropm/Makefile
+index 271aa73..3f08fae 100644
+--- a/demo/readpropm/Makefile
++++ b/demo/readpropm/Makefile
+@@ -27,11 +27,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/reinit/Makefile b/demo/reinit/Makefile
+index 42984e9..4d06c80 100644
+--- a/demo/reinit/Makefile
++++ b/demo/reinit/Makefile
+@@ -27,11 +27,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/scov/Makefile b/demo/scov/Makefile
+index 763de59..538c5c1 100644
+--- a/demo/scov/Makefile
++++ b/demo/scov/Makefile
+@@ -32,11 +32,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -rf core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET}
+diff --git a/demo/server/Makefile b/demo/server/Makefile
+index 25d6026..3e85cfb 100644
+--- a/demo/server/Makefile
++++ b/demo/server/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/timesync/Makefile b/demo/timesync/Makefile
+index 28ce904..ee526ad 100644
+--- a/demo/timesync/Makefile
++++ b/demo/timesync/Makefile
+@@ -27,11 +27,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/ucov/Makefile b/demo/ucov/Makefile
+index 703cd74..d80ff9f 100644
+--- a/demo/ucov/Makefile
++++ b/demo/ucov/Makefile
+@@ -27,11 +27,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/uptransfer/Makefile b/demo/uptransfer/Makefile
+index 8281c24..5964881 100644
+--- a/demo/uptransfer/Makefile
++++ b/demo/uptransfer/Makefile
+@@ -32,11 +32,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -rf core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET}
+diff --git a/demo/whohas/Makefile b/demo/whohas/Makefile
+index 57387a3..09b53d5 100644
+--- a/demo/whohas/Makefile
++++ b/demo/whohas/Makefile
+@@ -27,11 +27,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM  ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/whois/Makefile b/demo/whois/Makefile
+index 2c11748..9fb7cdb 100644
+--- a/demo/whois/Makefile
++++ b/demo/whois/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/whoisrouter/Makefile b/demo/whoisrouter/Makefile
+index 4940d32..bb819fb 100644
+--- a/demo/whoisrouter/Makefile
++++ b/demo/whoisrouter/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/writefile/Makefile b/demo/writefile/Makefile
+index f26b1fe..87e37a4 100644
+--- a/demo/writefile/Makefile
++++ b/demo/writefile/Makefile
+@@ -27,11 +27,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/demo/writeprop/Makefile b/demo/writeprop/Makefile
+index 5a9587f..e2f894f 100644
+--- a/demo/writeprop/Makefile
++++ b/demo/writeprop/Makefile
+@@ -27,11 +27,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
+diff --git a/lib/Makefile b/lib/Makefile
+index b245065..4e8bcff 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -147,7 +147,7 @@ PORT_MSTP_SRC = \
+ PORT_ETHERNET_SRC = \
+ 	$(BACNET_PORT_DIR)/ethernet.c
+ 
+-PORT_BIP_SRC = \
++PORT_BIP_SRC := \
+ 	$(BACNET_PORT_DIR)/bip-init.c \
+ 	$(BACNET_CORE)/bvlc.c \
+ 	$(BACNET_CORE)/bip.c
+@@ -204,11 +204,11 @@ $(LIBRARY): $(OBJS) Makefile
+ 	$(AR) rcs $@ $(OBJS)
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -rf core $(OBJS) $(LIBRARY)
+-- 
+1.7.9.5
+
