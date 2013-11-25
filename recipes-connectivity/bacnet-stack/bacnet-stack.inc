@@ -2,9 +2,14 @@ DESCRIPTION = "BACnet open source protocol stack"
 AUTHOR = "Steve Karg"
 SECTION = "console"
 LICENSE = "GPLv2"
-PR = "r2"
+PR = "r3"
 
 inherit siteinfo pkgconfig
+
+# The static library needs to be built before the demo applications are built.
+# So, disable parallel make for this recipe to ensure all pieces build in the
+# proper linear order.
+PARALLEL_MAKE = ""
 
 FILES_${PN} = " \
     ${bindir}/bacarf \
@@ -50,7 +55,7 @@ do_compile_append () {
 
 # Move all the binary files to /usr/bin
 do_install () {
-    install -d ${D}${bindir} ${D}${datadir} ${D}${libdir} ${STAGING_INCDIR}/${PN} 
+    install -d ${D}${bindir} ${D}${datadir} ${D}${libdir} ${D}${incdir} 
     install -m 0755 ${S}/bin/bacarf ${D}${bindir}
     install -m 0755 ${S}/bin/bacawf ${D}${bindir}
     install -m 0755 ${S}/bin/bacdcc ${D}${bindir}
@@ -76,6 +81,7 @@ do_install () {
     install -m 0755 ${S}/bin/mstpcrc ${D}${bindir}
     install -m 0644 ${S}/bin/readme.txt ${D}${datadir}
     install -m 0644 ${S}/lib/libbacnet.a ${D}${libdir}
-    install -m 0644 ${S}/include/* ${STAGING_INCDIR}/${PN}
+    install -m 0644 ${S}/include/* ${D}${incdir}
 }
+
 
