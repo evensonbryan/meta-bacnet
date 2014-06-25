@@ -1,19 +1,26 @@
-From 8e55eb788844ae3b56a008bc1a43de9747c24a96 Mon Sep 17 00:00:00 2001
+From 208a76bea4f80d4158e9a47480a8d7c564446984 Mon Sep 17 00:00:00 2001
 From: Bryan Evenson <bevenson@melinkcorp.com>
-Date: Mon, 19 Aug 2013 10:05:38 -0400
-Subject: [PATCH 01/02] Adjusted makefiles for cross-compile.
+Date: Tue, 10 Jun 2014 13:08:18 -0400
+Subject: [PATCH 1/1] Adjusted makefiles for cross-compile.
+
+Certain build variables, such as CFLAGS, are already defined by
+Bitbake and should not be overridden.  This patch changes key
+variable names so that the variables are not replaced and the
+project can be built.
 
 Signed-off-by: Bryan Evenson <bevenson@melinkcorp.com>
 ---
- Makefile                  |   39 +++++++++++++++++++++------------------
+ Makefile                  |   23 +++++++++++++----------
+ demo/Makefile             |   26 +++++++++++++-------------
  demo/dcc/Makefile         |    4 ++--
  demo/epics/Makefile       |    4 ++--
- demo/gateway/Makefile     |    4 ++--
+ demo/gateway/Makefile     |    8 ++++----
  demo/iamrouter/Makefile   |    4 ++--
  demo/initrouter/Makefile  |    4 ++--
  demo/mstpcap/Makefile     |    4 ++--
  demo/mstpcrc/Makefile     |    4 ++--
  demo/ptransfer/Makefile   |    4 ++--
+ demo/readbdt/Makefile     |    4 ++--
  demo/readfile/Makefile    |    4 ++--
  demo/readprop/Makefile    |    4 ++--
  demo/readpropm/Makefile   |    4 ++--
@@ -28,11 +35,11 @@ Signed-off-by: Bryan Evenson <bevenson@melinkcorp.com>
  demo/whoisrouter/Makefile |    4 ++--
  demo/writefile/Makefile   |    4 ++--
  demo/writeprop/Makefile   |    4 ++--
- lib/Makefile              |    6 +++---
- 24 files changed, 68 insertions(+), 65 deletions(-)
+ lib/Makefile              |   24 ++++++++++++------------
+ 26 files changed, 86 insertions(+), 83 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index b10b6b7..a7c630b 100644
+index ac2dc6a..a10fba6 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -9,6 +9,9 @@
@@ -45,7 +52,7 @@ index b10b6b7..a7c630b 100644
  # configuration
  # If BACNET_DEFINES has not already been set, configure to your needs here
  MY_BACNET_DEFINES = -DPRINT_ENABLED=1
-@@ -31,36 +34,36 @@ BBMD_DEFINE ?= -DBBMD_ENABLED=1
+@@ -28,27 +31,27 @@ BBMD_DEFINE ?=-DBBMD_ENABLED=1
  #BBMD_DEFINE ?= -DBBMD_CLIENT_ENABLED
  
  # Passing parameters via command line
@@ -58,30 +65,13 @@ index b10b6b7..a7c630b 100644
 +BACNET_DEFINES += $(BACDL_DEFINE) $(BBMD_DEFINE) -DWEAK_FUNC=
 +BACNET_DEFINES += $(BACNET_MAKE_DEFINE)
  
- # directories
+ # BACnet Ports Directory
  BACNET_PORT ?= linux
--BACNET_PORT_DIR = ../ports/${BACNET_PORT}
-+BACNET_PORT_DIR := ${BACNET_TOP}/ports/${BACNET_PORT}
  
--BACNET_OBJECT = ../demo/object
--BACNET_HANDLER = ../demo/handler
--BACNET_CORE = ../src
--BACNET_INCLUDE = ../include
-+BACNET_OBJECT := ${BACNET_TOP}/demo/object
-+BACNET_HANDLER := ${BACNET_TOP}/demo/handler
-+BACNET_CORE := ${BACNET_TOP}/src
-+BACNET_INCLUDE := ${BACNET_TOP}/include
- # compiler configuration
- #STANDARDS = -std=c99
--INCLUDE1 = -I$(BACNET_PORT_DIR) -I$(BACNET_OBJECT) -I$(BACNET_HANDLER)
--INCLUDE2 = -I$(BACNET_INCLUDE)
--INCLUDES = $(INCLUDE1) $(INCLUDE2)
+ # Default compiler settings
 -OPTIMIZATION = -Os
 -DEBUGGING =
 -WARNINGS = -Wall -Wmissing-prototypes
-+BACNET_INCLUDE1 = -I$(BACNET_PORT_DIR) -I$(BACNET_OBJECT) -I$(BACNET_HANDLER)
-+BACNET_INCLUDE2 = -I$(BACNET_INCLUDE)
-+BACNET_INCLUDES = $(BACNET_INCLUDE1) $(BACNET_INCLUDE2)
 +BACNET_OPTIMIZATION = -Os
 +BACNET_DEBUGGING =
 +BACNET_WARNINGS = -Wall -Wmissing-prototypes
@@ -100,6 +90,57 @@ index b10b6b7..a7c630b 100644
  
  # Export the variables defined here to all subprocesses
  # (see http://www.gnu.org/software/automake/manual/make/Special-Targets.html)
+diff --git a/demo/Makefile b/demo/Makefile
+index 2f9550a..cedfe54 100644
+--- a/demo/Makefile
++++ b/demo/Makefile
+@@ -9,18 +9,18 @@
+ 
+ # Directories
+ BACNET_PORT ?= linux
+-BACNET_PORT_DIR = ../../ports/${BACNET_PORT}
+-BACNET_INCLUDE = ../../include
+-BACNET_OBJECT = ../../demo/object
+-BACNET_HANDLER = ../../demo/handler
++BACNET_PORT_DIR := ${BACNET_TOP}/ports/${BACNET_PORT}
++BACNET_INCLUDE := ${BACNET_TOP}/include
++BACNET_OBJECT := ${BACNET_TOP}/demo/object
++BACNET_HANDLER := ${BACNET_TOP}/demo/handler
+ # BACnet Library
+-BACNET_LIB_DIR = ../../lib
++BACNET_LIB_DIR := ${BACNET_TOP}/lib
+ BACNET_LIB_NAME = bacnet
+ BACNET_LIB_TARGET = $(BACNET_LIB_DIR)/lib$(BACNET_LIB_NAME).a
+ # Compiler Setup
+-INCLUDE1 = -I$(BACNET_PORT_DIR) -I$(BACNET_OBJECT) -I$(BACNET_HANDLER)
+-INCLUDE2 = -I$(BACNET_INCLUDE)
+-INCLUDES = $(INCLUDE1) $(INCLUDE2)
++BACNET_INCLUDE1 = -I$(BACNET_PORT_DIR) -I$(BACNET_OBJECT) -I$(BACNET_HANDLER)
++BACNET_INCLUDE2 = -I$(BACNET_INCLUDE)
++BACNET_INCLUDES = $(BACNET_INCLUDE1) $(BACNET_INCLUDE2)
+ BACNET_LIB=-L$(BACNET_LIB_DIR),-l$(BACNET_LIB_NAME)
+ ifeq (${BACNET_PORT},linux)
+ PFLAGS = -pthread
+@@ -37,14 +37,14 @@ TARGET_EXT = .exe
+ SYSTEM_LIB=-lws2_32,-lgcc,-lm,-liphlpapi,-lwinmm
+ endif
+ #build for release (default) or debug
+-DEBUGGING =
+-OPTIMIZATION = -Os
++BACNET_DEBUGGING =
++BACNET_OPTIMIZATION = -Os
+ ifeq (${BUILD},debug)
+-OPTIMIZATION = -O0
+-DEBUGGING = -g
++BACNET_OPTIMIZATION = -O0
++BACNET_DEBUGGING = -g
+ endif
+ # put all the flags together
+-CFLAGS := -Wall $(DEBUGGING) $(OPTIMIZATION) $(INCLUDES) $(DEFINES)
++BACNET_CFLAGS := -Wall $(BACNET_DEBUGGING) $(BACNET_OPTIMIZATION) $(BACNET_INCLUDES) $(BACNET_DEFINES)
+ LFLAGS := -Wl,$(BACNET_LIB),$(SYSTEM_LIB)
+ 
+ .EXPORT_ALL_VARIABLES:
 diff --git a/demo/dcc/Makefile b/demo/dcc/Makefile
 index 1ddc898..249ceb0 100644
 --- a/demo/dcc/Makefile
@@ -137,10 +178,22 @@ index 01ddb04..3ab6386 100644
  clean:
  	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
 diff --git a/demo/gateway/Makefile b/demo/gateway/Makefile
-index d97d286..e28c64a 100644
+index a1fe53d..053fff0 100644
 --- a/demo/gateway/Makefile
 +++ b/demo/gateway/Makefile
-@@ -34,11 +34,11 @@ ${BACNET_LIB_TARGET}:
+@@ -34,9 +34,9 @@ SRCS = main.c \
+ 
+ OBJS = ${SRCS:.c=.o}
+ 
+-DEFINES += -DBAC_ROUTING
++BACNET_DEFINES += -DBAC_ROUTING
+ 
+-CFLAGS  = $(WARNINGS) $(DEBUGGING) $(OPTIMIZATION) $(STANDARDS) $(INCLUDES) $(DEFINES)
++BACNET_CFLAGS  = $(BACNET_WARNINGS) $(BACNET_DEBUGGING) $(BACNET_OPTIMIZATION) $(BACNET_STANDARDS) $(BACNET_INCLUDES) $(BACNET_DEFINES)
+ 
+ all: ${BACNET_LIB_TARGET} Makefile ${TARGET_BIN}
+ 
+@@ -51,11 +51,11 @@ ${BACNET_LIB_TARGET}:
  	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
  
  .c.o:
@@ -191,10 +244,10 @@ index ae7352e..8d08b91 100644
  clean:
  	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
 diff --git a/demo/mstpcap/Makefile b/demo/mstpcap/Makefile
-index 43c7e3e..ffaf93a 100644
+index 4990493..cae8150 100644
 --- a/demo/mstpcap/Makefile
 +++ b/demo/mstpcap/Makefile
-@@ -34,11 +34,11 @@ ${TARGET_BIN}: ${OBJS} Makefile
+@@ -36,11 +36,11 @@ ${TARGET_BIN}: ${OBJS} Makefile
  	cp $@ ../../bin
  
  .c.o:
@@ -244,6 +297,24 @@ index b1b9867..4f4c400 100644
  
  clean:
  	rm -rf core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET}
+diff --git a/demo/readbdt/Makefile b/demo/readbdt/Makefile
+index bed0d5c..5a42846 100644
+--- a/demo/readbdt/Makefile
++++ b/demo/readbdt/Makefile
+@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+ 	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
+ 
+ .c.o:
+-	${CC} -c ${CFLAGS} $*.c -o $@
++	${CC} -c ${BACNET_CFLAGS} ${CFLAGS} $*.c -o $@
+ 
+ depend:
+ 	rm -f .depend
+-	${CC} -MM ${CFLAGS} *.c >> .depend
++	${CC} -MM ${BACNET_CFLAGS} ${CFLAGS} *.c >> .depend
+ 
+ clean:
+ 	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
 diff --git a/demo/readfile/Makefile b/demo/readfile/Makefile
 index 235f65c..16380fa 100644
 --- a/demo/readfile/Makefile
@@ -335,10 +406,10 @@ index 763de59..538c5c1 100644
  clean:
  	rm -rf core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET}
 diff --git a/demo/server/Makefile b/demo/server/Makefile
-index 25d6026..3e85cfb 100644
+index 2e26c75..5a0fcba 100644
 --- a/demo/server/Makefile
 +++ b/demo/server/Makefile
-@@ -26,11 +26,11 @@ ${BACNET_LIB_TARGET}:
+@@ -46,11 +46,11 @@ ${BACNET_LIB_TARGET}:
  	( cd ${BACNET_LIB_DIR} ; $(MAKE) clean ; $(MAKE) )
  
  .c.o:
@@ -497,10 +568,35 @@ index 5a9587f..e2f894f 100644
  clean:
  	rm -f core ${TARGET_BIN} ${OBJS} ${BACNET_LIB_TARGET} $(TARGET).map
 diff --git a/lib/Makefile b/lib/Makefile
-index b245065..4e8bcff 100644
+index b4ad476..de9f97d 100644
 --- a/lib/Makefile
 +++ b/lib/Makefile
-@@ -147,7 +147,7 @@ PORT_MSTP_SRC = \
+@@ -9,16 +9,16 @@
+ #
+ # Assumes rm and cp are available
+ 
+-BACNET_PORT_DIR = ../ports/${BACNET_PORT}
+-BACNET_OBJECT = ../demo/object
+-BACNET_HANDLER = ../demo/handler
+-BACNET_CORE = ../src
+-BACNET_INCLUDE = ../include
++BACNET_PORT_DIR := ${BACNET_TOP}/ports/${BACNET_PORT}
++BACNET_OBJECT := ${BACNET_TOP}/demo/object
++BACNET_HANDLER := ${BACNET_TOP}/demo/handler
++BACNET_CORE := ${BACNET_TOP}/src
++BACNET_INCLUDE := ${BACNET_TOP}/include
+ # compiler configuration
+ #STANDARDS = -std=c99
+-INCLUDE1 = -I$(BACNET_PORT_DIR) -I$(BACNET_OBJECT) -I$(BACNET_HANDLER)
+-INCLUDE2 = -I$(BACNET_INCLUDE)
+-INCLUDES = $(INCLUDE1) $(INCLUDE2)
++BACNET_INCLUDE1 = -I$(BACNET_PORT_DIR) -I$(BACNET_OBJECT) -I$(BACNET_HANDLER)
++BACNET_INCLUDE2 = -I$(BACNET_INCLUDE)
++BACNET_INCLUDES = $(BACNET_INCLUDE1) $(BACNET_INCLUDE2)
+ 
+ # target
+ TARGET = bacnet
+@@ -142,7 +142,7 @@ PORT_MSTP_SRC = \
  PORT_ETHERNET_SRC = \
  	$(BACNET_PORT_DIR)/ethernet.c
  
@@ -509,7 +605,16 @@ index b245065..4e8bcff 100644
  	$(BACNET_PORT_DIR)/bip-init.c \
  	$(BACNET_CORE)/bvlc.c \
  	$(BACNET_CORE)/bip.c
-@@ -204,11 +204,11 @@ $(LIBRARY): $(OBJS) Makefile
+@@ -182,7 +182,7 @@ SRCS = ${CORE_SRC} ${PORT_SRC} ${HANDLER_SRC}
+ OBJS = ${SRCS:.c=.o}
+ 
+ # use local includes, but other values from calling Makefile
+-CFLAGS  = $(WARNINGS) $(DEBUGGING) $(OPTIMIZATION) $(STANDARDS) $(INCLUDES) $(DEFINES)
++BACNET_CFLAGS  = $(BACNET_WARNINGS) $(BACNET_DEBUGGING) $(BACNET_OPTIMIZATION) $(BACNET_STANDARDS) $(BACNET_INCLUDES) $(BACNET_DEFINES)
+ 
+ all: $(LIBRARY)
+ 
+@@ -192,11 +192,11 @@ $(LIBRARY): $(OBJS) Makefile
  	$(AR) rcs $@ $(OBJS)
  
  .c.o:
