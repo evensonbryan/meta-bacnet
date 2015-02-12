@@ -15,7 +15,7 @@ PARALLEL_MAKE = ""
 
 # Grab latest revision to fix build error for gateway demo
 SRCNAME = "bacnet-stack-0-8-0"
-SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/branches/releases;module=${SRCNAME};rev=r2742;protocol=http \
+SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/branches/releases;module=${SRCNAME};rev=r2790;protocol=http \
         file://0001-Adjusted-makefiles-for-cross-compile.patch \
         "        
 
