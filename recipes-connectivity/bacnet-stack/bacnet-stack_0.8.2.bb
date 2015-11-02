@@ -1,9 +1,10 @@
 DESCRIPTION = "BACnet open source protocol stack"
 AUTHOR = "Steve Karg"
 SECTION = "console"
-LICENSE = "GPLv2"
+LICENSE = "GPLv2-BACNET-STACK"
 PR = "r0"
 LIC_FILES_CHKSUM = "file://license/gpl-2.txt;md5=3040850b26eed151876dcd4b841f5235"
+RDEPENDS_${PN} = "bash"
 DEPENDS = "virtual/kernel"
 
 inherit pkgconfig
@@ -15,7 +16,7 @@ PARALLEL_MAKE = ""
 
 # Grab latest revision to fix build error for gateway demo
 SRCNAME = "bacnet-stack-0-8-0"
-SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/branches/releases;module=${SRCNAME};rev=r2790;protocol=http \
+SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/branches/releases;module=${SRCNAME};rev=r2905;protocol=http \
         file://0001-Adjusted-makefiles-for-cross-compile.patch \
         "        
 
@@ -26,7 +27,7 @@ SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/branches/releases;module=${SRCNAM
 #        file://0001-Adjusted-makefiles-for-cross-compile.patch \
 #        "        
 
-WORKDIR = "${TMPDIR}/work/${MULTIMACH_TARGET_SYS}/${PN}"
+# WORKDIR = "${TMPDIR}/work/${MULTIMACH_TARGET_SYS}/${PN}"
 S = "${WORKDIR}/${SRCNAME}"
 
 FILES_${PN} = " \
