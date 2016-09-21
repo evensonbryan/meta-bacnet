@@ -14,9 +14,9 @@ inherit pkgconfig
 # proper linear order.
 PARALLEL_MAKE = ""
 
-# Grab latest revision to fix build error for gateway demo
+# Grab latest revision from the bacnet-stack-0-8-0 branch
 SRCNAME = "bacnet-stack-0-8-0"
-SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/branches/releases;module=${SRCNAME};rev=r2905;protocol=http \
+SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/branches/releases;module=${SRCNAME};rev=r3021;protocol=http \
         file://0001-Adjusted-makefiles-for-cross-compile.patch \
         "        
 
