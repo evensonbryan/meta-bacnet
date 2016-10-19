@@ -1,64 +1,115 @@
-This README file contains information on the contents of the
-bacnet layer.
+This layer provides support for the BACnet stack.  This is an open
+source C implementation that produces a static C library and demo
+BACNet client and server applications.
+========================================================================
 
-Please see the corresponding sections below for details.
+For more information about this BACnet stack
+https://sourceforge.net/projects/bacnet/
 
+Developer's mailing list
+https://lists.sourceforge.net/lists/listinfo/bacnet-developers
+
+Sources
+-----------
+- meta-bacnet
+URI: git://github.com/evensonbryan/meta-bacnet.git
+URI: https://github.com/evensonbryan/meta-bacnet.git
+Branch: master
+
+- bacnet-stack source
+URI: https://sourceforge.net/p/bacnet/code/HEAD/tree/
+SVN: svn checkout svn://svn.code.sf.net/p/bacnet/code/trunk bacnet-code
 
 Dependencies
-============
+------------
+This Layer depends on :
+- openembedded-core
+URI: git://git.openembedded.org/openembedded-core/
+URI: http://cgit.openembedded.org/openembedded-core/
+Branch: master
 
-This layer depends on:
+Build procedure
+---------------
 
-  URI: git://git.openembedded.org/bitbake
-  branch: master
+1/ Clone yocto/poky git repository
+git clone git://git.yoctoproject.org/poky
 
-  URI: git://git.openembedded.org/openembedded-core
-  layers: meta
-  branch: master
+2/ Clone meta-bacnet git repository
+git clone git://github.com/evensonbryan/meta-bacnet.git meta-bacnet
 
-  URI: git://git.yoctoproject.org/xxxx
-  layers: xxxx
-  branch: master
+3/ Initialize build directory
+source oe-init-build-env build-poky
 
+4/ Add meta-bacnet layer patch to bblayer configuration file
+vim conf/bblayers.conf
 
-Patches
-=======
+# LAYER_CONF_VERSION is increased each time build/conf/bblayers.conf
+# changes incompatibly
+POKY_BBLAYERS_CONF_VERSION = "2"
 
-Please submit any patches against the bacnet layer to the
-xxxx mailing list (xxxx@zzzz.org) and cc: the maintainer:
+BBPATH = "${TOPDIR}"
+BBFILES ?= ""
 
-Maintainer: XXX YYYYYY <xxx.yyyyyy@zzzzz.com>
+BBLAYERS ?= " \
+  ##OEROOT##/meta-bacnet \
+  ##OEROOT##/meta \
+  ##OEROOT##/meta-yocto \
+  ##OEROOT##/meta-yocto-bsp \
+  "
 
+5/ Edit local.conf to specify the machine, location of source archived, package type (rpm, deb or ipk)
+for your specific BSP.  The BACnet stack is not machine specific.
 
-Table of Contents
-=================
+6/ Build the BACnet stack.  This builds all the demo applications.
+bitbake bacnet-stack
 
-  I. Adding the bacnet layer to your build
- II. Misc
+Customizing the build
+---------------------
+1/ Create a .bbappend in your custom layer:
+touch <your-layer>/recipes-connectivity/bacnet-stack/bacnet-stack_%.bbappend
 
+2/ In your .bbappend, change do_compile to build specific applications
+Examples:
+do_compile () {
+    # NOTE: There are many macros for defining different behavior and including/removing different
+    # code sections.  If you do not want the default settings, either define the macros here
+    # or create a patch file to update their definition in the Makefiles.
 
-I. Adding the bacnet layer to your build
-=================================================
+    # Example macro definition: include BACnet MS/TP support
+    BACDL_DEFINE=-DBACDL_MSTP=1
 
---- replace with specific instructions for the bacnet layer ---
+    # Example build 1: Build the demo applications
+    make demos
 
-In order to use this layer, you need to make the build system aware of
-it.
+    # Example build 2: Build the gateway demo
+    make gateway
 
-Assuming the bacnet layer exists at the top-level of your
-yocto build tree, you can add it to the build system by adding the
-location of the bacnet layer to bblayers.conf, along with any
-other layers needed. e.g.:
+    # Example build 3: Build just the static library
+    make library
+}
 
-  BBLAYERS ?= " \
-    /path/to/yocto/meta \
-    /path/to/yocto/meta-yocto \
-    /path/to/yocto/meta-yocto-bsp \
-    /path/to/yocto/meta-bacnet \
+3/ Add new FILES and do_install definitions in your .bbappend based upon what was
+changed in do_compile.  Example to include just the "Who-Is" demo application:
+FILES_${PN} = " \
+    ${bindir}/bacwi \
     "
+...
+do_install () {
+    install -d ${D}${bindir}
+    install -m 0755 ${S}/bin/bacwi ${D}${bindir}
+}
 
+Contributing
+------------
+Please use the github pull-request facility for submitting pull requests.
 
-II. Misc
-========
+for some useful guidelines to be followed when submitting patches:
+http://www.openembedded.org/wiki/How_to_submit_a_patch_to_OpenEmbedded
 
---- replace with specific information about the bacnet layer ---
+Maintainers:
+Bryan Evenson <bevenson@melinkcorp.com>
+
+When creating patches insert the [meta-bacnet] tag in the subject, for example
+use something like:
+git format-patch -s --subject-prefix='meta-bacnet][PATCH' <origin>
+
