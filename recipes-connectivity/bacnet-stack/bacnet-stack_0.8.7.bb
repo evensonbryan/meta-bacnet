@@ -14,22 +14,22 @@ inherit pkgconfig
 # proper linear order.
 PARALLEL_MAKE = ""
 
-# Grab latest revision from the bacnet-stack-0-8-0 branch
-SRCNAME = "bacnet-stack-0-8-0"
-SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/branches/releases;module=${SRCNAME};rev=r3021;protocol=http \
-        file://0001-Adjusted-makefiles-for-cross-compile.patch \
-        "        
+# Use this to grab latest revision from the bacnet-stack-0.8 branch
+SRCNAME = "bacnet-stack-0.8"
+SRCREV = "${SRCNAME}"
+SRC_URI = "git://github.com/bacnet-stack/bacnet-stack;branch=${SRCNAME}"
 
 # Use this to build the specific tagged revision that matches the recipe
 # version name
-#SRCNAME = "${BP}"
-#SRC_URI = "svn://svn.code.sf.net/p/bacnet/code/tags;module=${SRCNAME};rev=HEAD;protocol=http \
-#        file://0001-Adjusted-makefiles-for-cross-compile.patch \
-#        "        
+#SRCREV = "${BP}"
+#SRC_URI = "git://github.com/bacnet-stack/bacnet-stack"
 
-# WORKDIR = "${TMPDIR}/work/${MULTIMACH_TARGET_SYS}/${PN}"
-S = "${WORKDIR}/${SRCNAME}"
+# The Git repository
 
+# Set the working directory
+S = "${WORKDIR}/git"
+
+# Set all the application binaries for installation
 FILES_${PN} = " \
     ${bindir}/bacarf \
     ${bindir}/bacawf \
@@ -37,10 +37,14 @@ FILES_${PN} = " \
     ${bindir}/bacepics \
     ${bindir}/baciamr \
     ${bindir}/bacinitr \
+    ${bindir}/bacrbdt \
     ${bindir}/bacrd \
+    ${bindir}/bacrfdt \
+    ${bindir}/bacroute.sh \
     ${bindir}/bacrp \
     ${bindir}/bacrpd.sh \
     ${bindir}/bacrpm \
+    ${bindir}/bacrr \
     ${bindir}/bacscov \
     ${bindir}/bacserv \
     ${bindir}/bacts \
@@ -56,7 +60,7 @@ FILES_${PN} = " \
     ${bindir}/mstpcrc \
     ${datadir}/readme.txt \
     "
-    
+
 FILES_${PN}-staticdev = " \
     ${libdir}/libbacnet.a \
     "
@@ -77,9 +81,6 @@ do_compile () {
 do_compile_append_${PN} () {
     # Uncomment if you want to rebuild the documentation
     # doxygen BACnet-stack.doxyfile
-
-    # Uncomment if you want to perform static analysis on the project
-    # ./splint.sh
 }
 
 # Move all the binary files to /usr/bin
@@ -91,10 +92,13 @@ do_install () {
     install -m 0755 ${S}/bin/bacepics ${D}${bindir}
     install -m 0755 ${S}/bin/baciamr ${D}${bindir}
     install -m 0755 ${S}/bin/bacinitr ${D}${bindir}
+    install -m 0755 ${S}/bin/bacrbdt ${D}${bindir}
     install -m 0755 ${S}/bin/bacrd ${D}${bindir}
+    install -m 0755 ${S}/bin/bacroute.sh ${D}${bindir}
     install -m 0755 ${S}/bin/bacrp ${D}${bindir}
     install -m 0755 ${S}/bin/bacrpd.sh ${D}${bindir}/bacrpd.sh
     install -m 0755 ${S}/bin/bacrpm ${D}${bindir}
+    install -m 0755 ${S}/bin/bacrr ${D}${bindir}
     install -m 0755 ${S}/bin/bacscov ${D}${bindir}
     install -m 0755 ${S}/bin/bacserv ${D}${bindir}
     install -m 0755 ${S}/bin/bacts ${D}${bindir}
