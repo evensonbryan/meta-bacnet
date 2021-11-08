@@ -17,8 +17,8 @@ URI: https://github.com/evensonbryan/meta-bacnet.git
 Branch: master
 
 - bacnet-stack source
-URI: https://sourceforge.net/p/bacnet/code/HEAD/tree/
-SVN: svn checkout svn://svn.code.sf.net/p/bacnet/code/trunk bacnet-code
+URI: https://github.com/bacnet-stack/bacnet-stack
+GIT: git clone https://github.com/bacnet-stack/bacnet-stack bacnet-src
 
 Dependencies
 ------------
@@ -79,13 +79,10 @@ do_compile () {
     BACDL_DEFINE=-DBACDL_MSTP=1
 
     # Example build 1: Build the demo applications
-    make demos
+    make apps
 
     # Example build 2: Build the gateway demo
     make gateway
-
-    # Example build 3: Build just the static library
-    make library
 }
 
 3/ Add new FILES and do_install definitions in your .bbappend based upon what was
